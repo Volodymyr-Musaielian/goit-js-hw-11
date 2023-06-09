@@ -25,7 +25,7 @@ function onSubmit(event) {
   event.preventDefault();
   const form = event.currentTarget;
   const value = form.elements.searchQuery.value.trim();
-  console.log(value);
+  loadMoreBtn.hide();
 
   if (value === '') {
     Notiflix.Notify.failure(
@@ -34,40 +34,39 @@ function onSubmit(event) {
   } else {
     imageService.searchQuery = value;
     imageService.resetPage();
-    loadMoreBtn.show();
     clearMarkup();
     fetchImages().finally(() => form.reset());
   }
 }
 
-function fetchImages() {
-  return getImagesMarkup();
+async function fetchImages() {
+  const markup = await getImagesMarkup();
+
+  updateMarkup(markup);
 }
 
-function getImagesMarkup() {
-  return imageService
-    .getImages()
-    .then(({ hits, totalHits }) => {
-      console.log(hits);
-      console.log(totalHits);
-      if (hits.length === 0) {
-        loadMoreBtn.hide();
+async function getImagesMarkup() {
+  try {
+    const data = await imageService.getImages();
+    const { hits, totalHits } = data;
 
-        throw new Error(
-          Notiflix.Notify.failure(
-            'Sorry, there are no images matching your search query. Please try again.'
-          )
-        );
-      } else if (totalHits <= 40) {
-        loadMoreBtn.hide();
-        Notiflix.Notify.info(
-          "We're sorry, but you've reached the end of search results."
-        );
-      }
-      return hits.reduce((markup, hit) => markup + createMarkup(hit), '');
-    })
-    .then(updateMarkup)
-    .catch(onError);
+    if (hits.length === 0) {
+      loadMoreBtn.hide();
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+      return '';
+    } else if (hits.length < 40) {
+      loadMoreBtn.hide();
+      Notiflix.Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
+    } else if (totalHits >= 40) loadMoreBtn.show();
+    return hits.reduce((markup, hit) => markup + createMarkup(hit), '');
+  } catch (error) {
+    onError(error);
+    return '';
+  }
 }
 
 function createMarkup({

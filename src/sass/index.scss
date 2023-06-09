@@ -108,3 +108,30 @@ button:after {
     background-position: 0 0;
   }
 }
+
+.photo-card {
+  flex-basis: calc(
+    25% - 20px
+  ); /* Ширина каждой карточки - 25% ширины родительского контейнера, вычитая отступы */
+  margin-bottom: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f2f2f2;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.photo-card img {
+  width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.photo-card .info {
+  padding-left: 15px;
+}
+
+.photo-card .info-item {
+  margin-bottom: 10px;
+}
